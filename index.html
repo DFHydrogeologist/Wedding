@@ -33,11 +33,24 @@
   }
 
   /* SCREENS */
-  .screen { display: none; min-height: 100vh; animation: fadeIn 0.5s ease forwards; }
-  .screen.active { display: block; }
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+  .screen {
+    display: none;
+    min-height: 100vh;
+  }
+  .screen.active {
+    display: block;
+    animation: slideIn 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+  .screen.exit {
+    animation: slideOut 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(60px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes slideOut {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(-60px); }
   }
 
   /* BACK BUTTON */
@@ -586,14 +599,22 @@ function normalize(s) {
 }
 
 function goTo(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  window.scrollTo(0,0);
-  if (id === 'mesas') {
-    document.getElementById('searchInput').value = '';
-    document.getElementById('resultCard').classList.remove('visible');
-    document.getElementById('noResult').classList.remove('visible');
-    document.getElementById('allResults').classList.remove('visible');
+  const current = document.querySelector('.screen.active');
+  if (current) {
+    current.classList.add('exit');
+    setTimeout(() => {
+      current.classList.remove('active', 'exit');
+      const next = document.getElementById(id);
+      next.classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      if (id === 'mesas') {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('resultCard').classList.remove('visible');
+        document.getElementById('noResult').classList.remove('visible');
+        document.getElementById('allResults').classList.remove('visible');
+        setTimeout(() => document.getElementById('searchInput').focus(), 500);
+      }
+    }, 350);
   }
 }
 
